@@ -1,4 +1,5 @@
 import os
+import time
 import json
 import codecs
 import requests
@@ -6,7 +7,7 @@ import requests
 from hearthstone.deckstrings import Deck
 from hearthstone.enums import FormatType
 
-from hts.NineGridDrawer import NineGridDrawer
+from hts.GridImagesDrawer import GridImagesDrawer
 
 
 QiJiZeiCode = 'AAEDAaIHBtyWBPqgBIahBLWhBNyhBKWjBAz8lQT9lQTqlgT7lgT4oATUoQTdoQTfoQTkoQTnoQTooQSTogQA'
@@ -45,10 +46,13 @@ def download_file_to_local(url, filepath):
                 # 将内容写入文件
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
+            return True
         else:
             print(f'DownloadFile({url} Failed By status_code={response.status_code})')
+            return False
     except Exception as e:
         print(f'DownloadFile({url} Failed By {e})')
+        return False
 
 
 class DeckManager(object):
@@ -56,7 +60,7 @@ class DeckManager(object):
                  images_cache_dirpath):
         self.cards_json_filepath = cards_json_filepath
         self.images_cache_dirpath = images_cache_dirpath
-        self.nine_grid_drawer = NineGridDrawer()
+        self.grid_images_drawer = GridImagesDrawer()
 
         self.dbfId2CardsMap = dict()
 
@@ -73,20 +77,55 @@ class DeckManager(object):
         else:
             return None
     
-    # TODO: get if an image is already in cache,
+    # get if an image is already in cache,
     # if not then download it to the cache.
-    def get_image_by_dbfId(self, dbfId):
+    def get_image_filepath_by_dbfId(self, dbfId):
         card = self.get_card_info_by_dbfId(dbfId)
         filepath = os.path.join(self.images_cache_dirpath,
                                 '%s.png' % card['id'])
 
-        pass
+        if not os.path.exists(filepath):
+            download_url = CARD_RENDER_URL_TEMPLATE % ('zhCN', card['id'])
+            rc = download_file_to_local(download_url, filepath)
+            retryCnt = 1
+            while not rc and retryCnt <= 3:
+                time.sleep(1)
+                rc = download_file_to_local(download_url, filepath)
+                retryCnt += 1
+            
+            if not rc:
+                return None
+    
+        return filepath
+        
 
-    def decode(self, deckstring):
+    def get_all_card_image_filepath_list(self, deckstring):
         deck = Deck.from_deckstring(deckstring)
-        print(deck.heroes)
-        print(deck.cards)
-        return deck 
+        dbfIds = []
+        # for _id in deck.heroes:
+        #    dbfIds.append(_id)
+        for _id, freq in deck.cards:
+            for i in range(freq):
+                dbfIds.append(_id)
+        filepath_list = []
+        for dbfId in dbfIds:
+            filepath = self.get_image_filepath_by_dbfId(dbfId)
+            assert filepath is not None
+            filepath_list.append(filepath)
+        return filepath_list 
+    
+
+    def conv_deckstring_list_to_grid_images(self, deckstring_list,
+                                            output_keyname,
+                                            output_image_dirpath):
+        image_filepath_list = []
+        for deckstring in deckstring_list:
+            image_filepath_list.extend(
+                self.get_all_card_image_filepath_list(deckstring))
+        
+        
+        self.grid_images_drawer.draw(image_filepath_list, output_keyname,
+                                     output_image_dirpath) 
 
 
 if __name__ == '__main__':
@@ -94,6 +133,9 @@ if __name__ == '__main__':
         cards_json_filepath='./data/cards.json',
         images_cache_dirpath='./imagecache')
     
-    print(deck_manager.get_card_info_by_dbfId(dbfId=68348))
-    deck_manager.decode(QiJiZeiCode)
+    deckstring_list = [QiJiZeiCode, PaoXiaoDeCode]
+    deck_manager.conv_deckstring_list_to_grid_images(
+        deckstring_list=deckstring_list,
+        output_keyname='test', 
+        output_image_dirpath='./grid_images')
     

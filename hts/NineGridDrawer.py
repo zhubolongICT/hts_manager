@@ -1,4 +1,0 @@
-
-
-class NineGridDrawer(object):
-    pass
