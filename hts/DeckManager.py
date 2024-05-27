@@ -76,16 +76,13 @@ class DeckManager(object):
             return self.dbfId2CardsMap[dbfId]
         else:
             return None
-    
-    # get if an image is already in cache,
-    # if not then download it to the cache.
-    def get_image_filepath_by_dbfId(self, dbfId):
-        card = self.get_card_info_by_dbfId(dbfId)
+        
+    def get_image_filepath_by_cardId(self, cardId):
         filepath = os.path.join(self.images_cache_dirpath,
-                                '%s.png' % card['id'])
+                                '%s.png' % cardId) 
 
         if not os.path.exists(filepath):
-            download_url = CARD_RENDER_URL_TEMPLATE % ('zhCN', card['id'])
+            download_url = CARD_RENDER_URL_TEMPLATE % ('zhCN', cardId)
             rc = download_file_to_local(download_url, filepath)
             retryCnt = 1
             while not rc and retryCnt <= 3:
@@ -95,8 +92,15 @@ class DeckManager(object):
             
             if not rc:
                 return None
-    
+        
         return filepath
+    
+    # get if an image is already in cache,
+    # if not then download it to the cache.
+    def get_image_filepath_by_dbfId(self, dbfId):
+        card = self.get_card_info_by_dbfId(dbfId)
+        cardId = card['id']
+        return self.get_image_filepath_by_cardId(cardId)
         
 
     def get_all_card_image_filepath_list(self, deckstring):
@@ -117,11 +121,16 @@ class DeckManager(object):
 
     def conv_deckstring_list_to_grid_images(self, deckstring_list,
                                             output_keyname,
-                                            output_image_dirpath):
+                                            output_image_dirpath,
+                                            extra_card_id_list=[]):
         image_filepath_list = []
         for deckstring in deckstring_list:
             image_filepath_list.extend(
                 self.get_all_card_image_filepath_list(deckstring))
+        for card_id in extra_card_id_list:
+            filepath = self.get_image_filepath_by_cardId(card_id)
+            assert filepath is not None
+            image_filepath_list.append(filepath)
         
         
         self.grid_images_drawer.draw(image_filepath_list, output_keyname,
@@ -133,9 +142,9 @@ if __name__ == '__main__':
         cards_json_filepath='./data/cards.json',
         images_cache_dirpath='./imagecache')
     
-    deckstring_list = [QiJiZeiCode, PaoXiaoDeCode]
     deck_manager.conv_deckstring_list_to_grid_images(
-        deckstring_list=deckstring_list,
-        output_keyname='test', 
-        output_image_dirpath='./grid_images')
+        deckstring_list=[QiJiZeiCode, PaoXiaoDeCode],
+        output_keyname='test',
+        output_image_dirpath='./grid_images',
+        extra_card_id_list=['EX1_158t', 'EX1_158t', 'EX1_158t'])
     
