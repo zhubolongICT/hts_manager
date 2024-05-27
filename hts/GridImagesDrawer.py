@@ -17,7 +17,7 @@ class GridImagesDrawer(object):
 
 
     def draw(self, image_filepath_list, output_key,
-             output_dirpath):
+             output_dirpath, isCardBack=False):
 
         origin_w = 512    # 每张小图片的宽度
         origin_h = 776    # 每张小图片的高度
@@ -52,11 +52,15 @@ class GridImagesDrawer(object):
                         ow, oh = from_image.size
                         if ow != origin_w or oh != origin_h:
                             from_image = from_image.resize( (w, h), PIL.Image.Resampling.LANCZOS)
-                        cropped_img = from_image.crop((self.left_corner_w, 
-                                                       self.left_corner_h,
-                                                       self.left_corner_w + w,
-                                                       self.left_corner_h + h))
-                        to_image.paste(cropped_img, ((x - 1) * w + margin_w, (y - 1) * h + margin_h))
+                        
+                        if isCardBack:
+                            to_image.paste(from_image, ((x - 1) * w + margin_w, (y - 1) * h + margin_h))
+                        else:
+                            cropped_img = from_image.crop((self.left_corner_w, 
+                                                        self.left_corner_h,
+                                                        self.left_corner_w + w,
+                                                        self.left_corner_h + h))
+                            to_image.paste(cropped_img, ((x - 1) * w + margin_w, (y - 1) * h + margin_h))
             
             draw = ImageDraw.Draw(to_image)
 
