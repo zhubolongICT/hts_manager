@@ -10,8 +10,8 @@ from hearthstone.enums import FormatType
 from hts.GridImagesDrawer import GridImagesDrawer
 
 
-QiJiZeiCode = 'AAEDAaIHBtyWBPqgBIahBLWhBNyhBKWjBAz8lQT9lQTqlgT7lgT4oATUoQTdoQTfoQTkoQTnoQTooQSTogQA'
-PaoXiaoDeCode = 'AAEDAZICCK2hBLWhBNuhBO+hBJOiBJiiBNaiBI+jBAvZlQTblQTclQSwlgTdlgSvoQTpoQTwoQTxoQS9owTFqgQA'
+QiJiZeiCode = 'AAEDAaIHBvuWBPqgBIahBLWhBNyhBKWjBAz8lQT9lQTclgTqlgT4oATUoQTdoQTfoQTkoQTnoQTooQSTogQA'
+PaoXiaoDeCode = 'AAEDAZICBK+hBLWhBMmhBI+jBA3ZlQTblQTclQSwlgTdlgTQoQTpoQTwoQTxoQSTogS9owTKowTFqgQA'
 
 
 CARD_RENDER_URL_TEMPLATE = \
@@ -137,31 +137,3 @@ class DeckManager(object):
         self.grid_images_drawer.draw(image_filepath_list, output_keyname,
                                      output_image_dirpath, isCardBack) 
 
-
-if __name__ == '__main__':
-    deck_manager = DeckManager(
-        cards_json_filepath='./data/cards.json',
-        images_cache_dirpath='./imagecache')
-    
-    # deck_manager.conv_deckstring_list_to_grid_images(
-        # deckstring_list=[QiJiZeiCode, PaoXiaoDeCode],
-        # output_keyname='test',
-        # output_image_dirpath='./grid_images',
-        # extra_card_id_list=['EX1_158t', 'EX1_158t', 'EX1_158t'])
-    
-
-    # https://hearthstone.fandom.com/wiki/Card_back
-    # https://static.wikia.nocookie.net/hearthstone_gamepedia/images/a/a8/CardBack119.png/revision/latest?cb=20230612200128
-    deck_manager.conv_deckstring_list_to_grid_images(
-        deckstring_list=[],
-        output_keyname='cardback_01',
-        output_image_dirpath='./grid_images',
-        extra_card_id_list=['CardBack232'] * 9,
-        isCardBack=True) 
-    deck_manager.conv_deckstring_list_to_grid_images(
-        deckstring_list=[],
-        output_keyname='cardback_02',
-        output_image_dirpath='./grid_images',
-        extra_card_id_list=['CardBack119'] * 9,
-        isCardBack=True) 
-    
