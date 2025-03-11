@@ -70,6 +70,9 @@ class DeckManager(object):
             json_card_array = json.loads(fp.read())
             for json_card in json_card_array:
                 self.dbfId2CardsMap[json_card['dbfId']] = json_card
+    
+    def get_dbfId2CardsMap(self):
+        return self.dbfId2CardsMap
 
     def get_card_info_by_dbfId(self, dbfId):
         if dbfId in self.dbfId2CardsMap:
