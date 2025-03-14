@@ -6,7 +6,7 @@ from hts.DeckManager import DeckManager
 if __name__ == "__main__":
     manager = DeckManager(
         cards_json_filepath='data/cards.json',
-        images_cache_dirpath='/mnt/d/imagecache')
+        images_cache_dirpath='../imagecache')
 
     dbfId2CardsMap = manager.get_dbfId2CardsMap()
     pbar = tqdm(total=len(dbfId2CardsMap))
